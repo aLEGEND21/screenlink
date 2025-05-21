@@ -3,19 +3,15 @@ import { parse } from "url";
 import next from "next";
 import { Server } from "socket.io";
 
-// Initalize a Next.js app
 const app = next({ dev: process.env.NODE_ENV !== "production" });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
-  // Create an HTTP server and forward all requests to Next.js
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
   });
 
-  // Initialize Socket.IO on the HTTP server
-  // This allows it to work with the same Next.js server instance
   const io = new Server(server, {
     cors: {
       origin: "*",
@@ -23,21 +19,31 @@ app.prepare().then(() => {
     },
   });
 
-  // Handle new users connecting to the Socket.IO server
   io.on("connection", (socket) => {
-    console.log("[socket.io] User connected");
+    const socketId = socket.id;
+    console.log(`[socket.io] User connected: ${socketId}`);
 
-    socket.on("disconnect", () => {
-      console.log("[socket.io] User disconnected");
+    socket.on("share-started", () => {
+      console.log(`[socket.io] User ${socketId} started sharing`);
+      socket.broadcast.emit("share-started");
     });
 
-    socket.on("message-send", (message) => {
-      console.log("[socket.io] Message received:", message);
-      socket.broadcast.emit("message-receive", message);
+    socket.on("screen-data", (data) => {
+      socket.broadcast.emit("screen-data", data);
+    });
+
+    socket.on("share-ended", () => {
+      console.log(`[socket.io] User ${socketId} ended sharing`);
+      socket.broadcast.emit("share-stopped");
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log(
+        `[socket.io] User disconnected: ${socketId} (Reason: ${reason})`
+      );
     });
   });
 
-  // Start the HTTP server on port 3000
   server.listen(3000, (err) => {
     if (err) throw err;
     console.log("> Ready on http://localhost:3000");
