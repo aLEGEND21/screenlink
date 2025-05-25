@@ -16,6 +16,10 @@ const ShareScreen = () => {
   }, []);
 
   const stopSharing = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -27,48 +31,36 @@ const ShareScreen = () => {
   };
 
   const handleStartShare = async () => {
-    try {
-      if (!peerRef.current) {
-        // Hardcoded ID for simplicity
-        peerRef.current = new Peer("sharer-id", {
-          debug: 2, // Log errors and warnings
-        });
-      }
-
-      // Create the MediaStream for screen sharing
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
+    if (!peerRef.current) {
+      // Hardcoded ID for simplicity
+      peerRef.current = new Peer("sharer-id", {
+        debug: 2, // Log errors and warnings
       });
-      streamRef.current = stream;
-
-      // Display the stream in the video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-
-      // Handle when user stops sharing via browser UI
-      stream.getVideoTracks()[0].addEventListener("ended", () => {
-        stopSharing();
-      });
-
-      // Wait for connection from viewers
-      peerRef.current.on("connection", (conn) => {
-        console.log("Viewer connected:", conn.peer);
-        peerRef.current!.call(conn.peer, stream);
-      });
-
-      // Handle call from viewer
-      peerRef.current.on("call", (call) => {
-        call.on("error", (err) => {
-          console.error("Call error:", err);
-        });
-        console.log("Call from viewer:", call.peer);
-        call.answer(stream);
-      });
-    } catch (error) {
-      console.error("Error starting screen share:", error);
     }
+
+    // Create the MediaStream for screen sharing
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: false,
+    });
+    streamRef.current = stream;
+
+    // Display the stream in the video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+
+    // Handle when user stops sharing via browser UI
+    stream.getVideoTracks()[0].addEventListener("ended", () => {
+      stopSharing();
+    });
+
+    // Wait for connection from viewers and call the viewer
+    // We must call the viewer since a valid stream must be provided to the call function, which
+    // the viewer does not have access to until the sharer calls them.
+    peerRef.current.on("connection", (conn) => {
+      peerRef.current!.call(conn.peer, stream);
+    });
   };
 
   return (

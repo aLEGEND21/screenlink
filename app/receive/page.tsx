@@ -18,46 +18,40 @@ const ReceiveShare = () => {
 
     // Wait for peer to be fully open before connecting
     peerRef.current.on("open", (id) => {
-      console.log("My peer ID is:", id);
-
-      // Now that peer is open, connect to the sharer
+      // Conect to the sharer
       const ROOM_ID = "sharer-id"; // Hardcoded ID for simplicity
-      try {
-        connectionRef.current = peerRef.current!.connect(ROOM_ID);
+      connectionRef.current = peerRef.current!.connect(ROOM_ID);
+      connectionRef.current.on("open", () => {
+        setIsConnected(true);
+      });
 
-        connectionRef.current.on("open", () => {
-          console.log("Connected to sharer");
-          setIsConnected(true);
+      // Wait for the upstream connection to call this peer
+      peerRef.current!.on("call", (call) => {
+        call.answer();
+
+        // Update the video element once the call is answered with a stream
+        call.on("stream", (stream: MediaStream) => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
         });
 
-        peerRef.current!.on("call", (call) => {
-          call.answer();
-          console.log("Call answered");
-          call.on("stream", (stream: MediaStream) => {
-            console.log("Received stream from sharer");
-            if (videoRef.current) {
-              videoRef.current.srcObject = stream;
-            }
-          });
-          call.on("error", (err) => {
-            console.error("Call error:", err);
-            setError("Error in media connection");
-          });
+        // Handle errors with the call
+        call.on("error", (err) => {
+          console.error("Call error:", err);
+          setError("Error in media connection");
         });
-      } catch (err) {
-        console.error("Failed to create connection:", err);
-        setError("Failed to create connection");
-      }
+      });
     });
 
+    // Handle peer connection errors
     peerRef.current.on("error", (err) => {
       console.error("Peer connection error:", err);
       setError("Peer connection error");
     });
 
-    // Proper cleanup function
+    // Clean up the video stream and peer connection on unmount
     return () => {
-      console.log("Cleaning up receiver");
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
@@ -83,8 +77,6 @@ const ReceiveShare = () => {
         autoPlay
         playsInline
         muted
-        onLoadedMetadata={() => console.log("Video metadata loaded")}
-        onError={(e) => console.error("Video error:", e)}
         style={{
           width: "100%",
           maxHeight: "80vh",
