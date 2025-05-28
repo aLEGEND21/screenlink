@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Peer from "peerjs";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,9 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Copy, MonitorStop, Share2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
+import { Copy, MonitorStop, Share2 } from "lucide-react";
+import Peer from "peerjs";
+import { useEffect, useRef, useState } from "react";
 
 const ShareScreen = () => {
   const peerRef = useRef<Peer | null>(null);
@@ -86,7 +86,7 @@ const ShareScreen = () => {
   };
 
   return (
-    <div className="container max-w-7xl py-12 mx-auto px-10">
+    <div className="container mx-auto max-w-7xl px-10 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,7 +102,7 @@ const ShareScreen = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="aspect-video overflow-hidden rounded-md bg-muted">
+            <div className="bg-muted aspect-video overflow-hidden rounded-md">
               {status === "disconnected" ? (
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">
@@ -156,11 +156,11 @@ const ShareScreen = () => {
                       status === "connected"
                         ? "bg-green-500"
                         : status === "connecting"
-                          ? "bg-yellow-500 animate-pulse"
+                          ? "animate-pulse bg-yellow-500"
                           : "bg-red-500"
                     }`}
                   />
-                  <span className="text-sm capitalize text-muted-foreground">
+                  <span className="text-muted-foreground text-sm capitalize">
                     {status}
                   </span>
                 </div>
@@ -171,7 +171,7 @@ const ShareScreen = () => {
             <div className="space-y-2">
               <p className="text-sm font-medium">Room Code</p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 rounded-md bg-muted p-3 text-center font-mono text-lg tracking-widest">
+                <div className="bg-muted flex-1 rounded-md p-3 text-center font-mono text-lg tracking-widest">
                   {roomId || "------"}
                 </div>
                 <Button
@@ -188,7 +188,7 @@ const ShareScreen = () => {
             <div className="space-y-2">
               <p className="text-sm font-medium">Room Link</p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 truncate rounded-md bg-muted p-3 font-mono text-sm">
+                <div className="bg-muted flex-1 truncate rounded-md p-3 font-mono text-sm">
                   {roomUrl || "Waiting for room..."}
                 </div>
                 <Button
@@ -223,9 +223,9 @@ const ShareScreen = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="mt-10"
       >
-        <div className="rounded-lg border bg-card p-6">
+        <div className="bg-card rounded-lg border p-6">
           <h3 className="mb-4 text-xl font-medium">Instructions</h3>
-          <ol className="ml-6 list-decimal space-y-2 text-muted-foreground">
+          <ol className="text-muted-foreground ml-6 list-decimal space-y-2">
             <li>
               Click the <strong>"Start Sharing"</strong> button above and select
               the screen or application you want to share.
