@@ -14,6 +14,7 @@ import { ArrowLeft, Copy, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
+import { copyRoomUrl } from "@/lib/utils";
 
 export default function ViewMockupPage() {
   const peerRef = useRef<Peer | null>(null);
@@ -174,7 +175,10 @@ export default function ViewMockupPage() {
               Connected to shared screen
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => {}}>
+              <Button
+                variant="outline"
+                onClick={() => copyRoomUrl(mockRoomUrl)}
+              >
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Room Link
               </Button>

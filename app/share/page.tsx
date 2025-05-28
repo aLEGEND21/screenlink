@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { Copy, MonitorStop, Share2 } from "lucide-react";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
+import { copyRoomCode, copyRoomUrl } from "@/lib/utils";
 
 const ShareScreen = () => {
   const peerRef = useRef<Peer | null>(null);
@@ -178,7 +179,7 @@ const ShareScreen = () => {
                   size="sm"
                   variant="outline"
                   disabled={!roomId}
-                  onClick={handleCopyCode}
+                  onClick={() => copyRoomCode(roomId)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -195,7 +196,7 @@ const ShareScreen = () => {
                   size="sm"
                   variant="outline"
                   disabled={!roomUrl}
-                  onClick={handleCopyLink}
+                  onClick={() => copyRoomUrl(roomUrl)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -208,7 +209,7 @@ const ShareScreen = () => {
               className="w-full"
               variant="outline"
               disabled={!roomUrl}
-              onClick={handleCopyLink}
+              onClick={() => copyRoomUrl(roomUrl)}
             >
               <Share2 className="mr-2 h-4 w-4" />
               Copy & Share Link
