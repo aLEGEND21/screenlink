@@ -46,7 +46,7 @@ export default function ViewMockupPage() {
 
   useEffect(() => {
     // Initialize the peer
-    peerRef.current = new Peer("receiver-id", {
+    peerRef.current = new Peer({
       debug: 2, // Log errors and warnings
     });
 
