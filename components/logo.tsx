@@ -1,5 +1,6 @@
-import { Monitor } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import Icon from "../app/icon.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -21,9 +22,11 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
 
   return (
     <Link href="/" className="flex items-center gap-2">
-      <div className="flex items-center justify-center rounded-md bg-primary p-1 text-primary-foreground">
-        <Monitor className={sizeClasses[size]} />
-      </div>
+      <Image
+        src={Icon}
+        alt="Screenlink"
+        className={`rounded-md ${sizeClasses[size]}`}
+      />
       {showText && (
         <span className={`font-bold ${textSizeClasses[size]}`}>Screenlink</span>
       )}
