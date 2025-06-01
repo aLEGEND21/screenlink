@@ -10,11 +10,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  copyRoomCode,
+  copyRoomUrl,
+  generateRoomId,
+  getRoomUrl,
+} from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Copy, MonitorStop, Share2 } from "lucide-react";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
-import { copyRoomCode, copyRoomUrl } from "@/lib/utils";
 
 const ShareScreen = () => {
   const peerRef = useRef<Peer | null>(null);
@@ -23,15 +28,15 @@ const ShareScreen = () => {
   const [status, setStatus] = useState<
     "disconnected" | "connecting" | "connected"
   >("disconnected");
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [roomUrl, setRoomUrl] = useState<string | null>(null);
 
-  // NOTE: TEMP
-  const roomId = "room-id-123";
-  const roomUrl = `${roomId}`; // Replace with your actual URL logic
-  const handleCopyLink = async () => {};
-  const handleCopyCode = async () => {};
-
-  // Cleanup function to stop sharing when the component unmounts
   useEffect(() => {
+    const genId = generateRoomId();
+    setRoomId(genId);
+    setRoomUrl(getRoomUrl(genId));
+
+    // Stop sharing when the component unmounts
     return () => {
       stopSharing();
     };
@@ -63,7 +68,7 @@ const ShareScreen = () => {
 
   const startSharing = async () => {
     if (!peerRef.current) {
-      peerRef.current = new Peer("sharer-id", {
+      peerRef.current = new Peer(roomId!, {
         debug: 2,
       });
     }
@@ -179,7 +184,7 @@ const ShareScreen = () => {
                   size="sm"
                   variant="outline"
                   disabled={!roomId}
-                  onClick={() => copyRoomCode(roomId)}
+                  onClick={() => copyRoomCode(roomId!)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -196,7 +201,7 @@ const ShareScreen = () => {
                   size="sm"
                   variant="outline"
                   disabled={!roomUrl}
-                  onClick={() => copyRoomUrl(roomUrl)}
+                  onClick={() => copyRoomUrl(roomId!)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -209,7 +214,7 @@ const ShareScreen = () => {
               className="w-full"
               variant="outline"
               disabled={!roomUrl}
-              onClick={() => copyRoomUrl(roomUrl)}
+              onClick={() => copyRoomUrl(roomId!)}
             >
               <Share2 className="mr-2 h-4 w-4" />
               Copy & Share Link

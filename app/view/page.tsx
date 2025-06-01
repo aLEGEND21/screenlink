@@ -9,12 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { copyRoomCode, copyRoomUrl } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ArrowLeft, Copy, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
-import { copyRoomUrl } from "@/lib/utils";
 
 export default function ViewMockupPage() {
   const peerRef = useRef<Peer | null>(null);
@@ -25,6 +25,16 @@ export default function ViewMockupPage() {
     "disconnected" | "connecting" | "connected"
   >("disconnected");
   const [error, setError] = useState<string | null>(null);
+  const [upstreamRoomId, setUpstreamRoomId] = useState<string | null>(null);
+
+  // Load the room ID from the URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get("roomId");
+    if (roomId) {
+      setUpstreamRoomId(roomId);
+    }
+  }, [window.location.search]);
 
   const handleFullscreen = () => {
     if (videoRef.current) {
@@ -46,8 +56,7 @@ export default function ViewMockupPage() {
     // Wait for peer to be fully open before connecting
     peerRef.current.on("open", (id) => {
       // Connect to the sharer
-      const ROOM_ID = "sharer-id"; // Hardcoded ID for simplicity
-      connectionRef.current = peerRef.current!.connect(ROOM_ID);
+      connectionRef.current = peerRef.current!.connect(upstreamRoomId!);
 
       // Wait for the upstream connection to call this peer
       peerRef.current!.on("call", (call) => {
@@ -91,7 +100,7 @@ export default function ViewMockupPage() {
       }
       setStatus("disconnected");
     };
-  }, []);
+  }, [upstreamRoomId]);
 
   // Video setup effect
   useEffect(() => {
@@ -105,9 +114,6 @@ export default function ViewMockupPage() {
       }
     }
   }, [status]);
-
-  const mockRoomId = "ABC123";
-  const mockRoomUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/view/${mockRoomId}`;
 
   return (
     <div className="container mx-auto max-w-5xl px-10 py-12">
@@ -125,7 +131,17 @@ export default function ViewMockupPage() {
           </Button>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-sm">Room:</span>
-            <span className="font-mono font-medium">{mockRoomId}</span>
+            <div className="flex items-center gap-1">
+              <span className="font-mono font-medium">{upstreamRoomId}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto px-1"
+                onClick={() => copyRoomCode(upstreamRoomId!)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
             <div
               className={`ml-2 h-2.5 w-2.5 rounded-full ${
                 status === "connected"
@@ -146,7 +162,7 @@ export default function ViewMockupPage() {
             <CardTitle>Viewing Shared Screen</CardTitle>
             <CardDescription>
               You are viewing a shared screen for room{" "}
-              <strong>{mockRoomId}</strong>
+              <strong>{upstreamRoomId}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -177,7 +193,7 @@ export default function ViewMockupPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => copyRoomUrl(mockRoomUrl)}
+                onClick={() => copyRoomUrl(upstreamRoomId!)}
               >
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Room Link
