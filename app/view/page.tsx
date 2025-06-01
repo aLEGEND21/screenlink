@@ -15,6 +15,7 @@ import { ArrowLeft, Copy, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import Peer from "peerjs";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function ViewMockupPage() {
   const peerRef = useRef<Peer | null>(null);
@@ -77,11 +78,16 @@ export default function ViewMockupPage() {
       });
     });
 
-    // Handle peer connection errors
+    // Handle peer connection errors. This is often triggered by the room not existing or the upstream peer not
+    // having started sharing.
     peerRef.current.on("error", (err) => {
       console.error("Peer connection error:", err);
       setError("Peer connection error");
       setStatus("disconnected");
+      toast.error(`Unable to connect to room`, {
+        description:
+          "Please check the room ID and refresh the page to try again.",
+      });
     });
 
     // Clean up the video stream and peer connection on unmount
