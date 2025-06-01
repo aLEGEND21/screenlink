@@ -16,8 +16,7 @@ export function RoomCodeInput() {
     if (!roomCode.trim()) return;
 
     setIsLoading(true);
-    // Navigate to the room
-    router.push(`/view/${roomCode.trim().toUpperCase()}`);
+    router.push(`/view?roomId=${roomCode.trim().toUpperCase()}`);
   };
 
   return (
